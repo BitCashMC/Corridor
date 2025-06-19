@@ -28,7 +28,7 @@ public class OpenVault implements CommandExecutor {
             instance.getLogger().log(Level.FINE, "Vault number '" + strings[0] + "' not a valid argument. Please choose a natural number.");
         }
 
-        Inventory inventory = instance.getDataService().sendInventory(player.getUniqueId(),num);
+        Inventory inventory = instance.getVaultManager().buildInventory(player,num);
         player.openInventory(inventory);
 
         return true;

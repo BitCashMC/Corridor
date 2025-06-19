@@ -1,7 +1,6 @@
 package gg.bitcash.corridor.components.inventory.playervault.database;
 
-import gg.bitcash.corridor.components.inventory.playervault.VaultIdentity;
-import org.bukkit.Bukkit;
+import gg.bitcash.corridor.components.inventory.playervault.VaultManager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -15,7 +14,7 @@ public class VaultDataService {
         vaultsMap = new HashMap<>();
     }
 
-    public Inventory sendInventory(UUID uuid, int number) {
+    public VaultMeta fetchVaultMeta(UUID uuid, int number) {
 
         if (!(vaultsMap.containsKey(uuid))) {
             vaultsMap.put(uuid,new HashMap<>());
@@ -26,18 +25,36 @@ public class VaultDataService {
         }
 
         ItemStack[] items = vaultsMap.get(uuid).get(number);
-        Inventory inv = Bukkit.createInventory(new VaultIdentity(number),54);
-        inv.setContents(items);
-
-        return inv;
+        return new VaultMeta(uuid,items,number);
     }
 
-    public boolean saveInventory(Inventory inventory, UUID uuid) {
-        if (!(inventory.getHolder() instanceof VaultIdentity vaultIdentity)) return false;
-
-        vaultsMap.get(uuid).put(vaultIdentity.getVaultNumber(), inventory.getContents());
-
-        return true;
+    public void saveVault(Inventory inventory, UUID uuid, int number) {
+        vaultsMap.get(uuid).put(number, inventory.getContents());
     }
 
+    public static class VaultMeta {
+
+        private final UUID uuid;
+        private final ItemStack[] itemStacks;
+        private final int number;
+
+        public VaultMeta(UUID uuid, ItemStack[] itemStacks, int number) {
+            this.uuid = uuid;
+            this.itemStacks = itemStacks;
+            this.number = number;
+        }
+
+        public int getNumber() {
+            return number;
+        }
+
+        public ItemStack[] getItemStacks() {
+            return itemStacks;
+        }
+
+        public UUID getUuid() {
+            return uuid;
+        }
+
+    }
 }

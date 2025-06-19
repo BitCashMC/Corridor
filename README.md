@@ -19,11 +19,18 @@ The vault mechanism allows for players to store items in personal, virtualized c
 > 
 > The saving is done by fetching the existing itemstack array of the inventory from the event instance and then writing to the data service object.
 > 
-> **STEPS**
-> 1. Get the command base framework. -- DONE
-> 2. Get the data service object working with the right read/write functions for the command to ultimately use.
-> 3. Create the inventory closure listener and have it do the aforementioned operations.
+> **Next Stage**
+> is to get the title to show the player's username and vault number at the top. Before I do that, I need to refactor
+> how inventories are assembled and delivered. It feels out of place for the Data Service to be responsible for assembling
+> inventories.
+> 
+> #### Vault Manager
+> The vault manager, which possesses a VaultDataService object as state, will receive the data from the object and will construct
+> the inventory to be delivered to the player. The 
+> 
+> **buildInventory** will package the Inventory instance to be displayed by the user.  
 > 
 > **TO DO**
-> 1. Create a write function for the VaultDataService
-> 2. Create a listener that will save the vault upon closure
+> 1. Admin mechanism to open other people's vaults
+> 2. Implement the DAO
+> 3. Introduce configurability

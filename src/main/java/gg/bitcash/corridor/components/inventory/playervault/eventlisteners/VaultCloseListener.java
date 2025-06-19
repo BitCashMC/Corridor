@@ -1,13 +1,11 @@
 package gg.bitcash.corridor.components.inventory.playervault.eventlisteners;
 
 import gg.bitcash.corridor.Corridor;
-import gg.bitcash.corridor.components.inventory.playervault.VaultIdentity;
+import gg.bitcash.corridor.components.inventory.playervault.VaultManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
-
-import java.util.Arrays;
 
 public class VaultCloseListener extends VaultListener implements Listener {
 
@@ -19,12 +17,9 @@ public class VaultCloseListener extends VaultListener implements Listener {
     public void onVaultClose(InventoryCloseEvent event) {
         Inventory inventory = event.getInventory();
 
-        if (!(inventory.getHolder() instanceof VaultIdentity vaultIdentity)) return;
+        if (!(inventory.getHolder() instanceof VaultManager.VaultIdentity vaultIdentity)) return;
 
-        System.out.println(inventory);
-        System.out.println(Arrays.toString(inventory.getContents()));
-
-        instance.getDataService().saveInventory(inventory,event.getPlayer().getUniqueId());
+        instance.getDataService().saveVault(inventory,event.getPlayer().getUniqueId(), vaultIdentity.getVaultNumber());
 
 
     }
