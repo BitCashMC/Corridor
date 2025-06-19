@@ -27,7 +27,7 @@ public class VaultDataService {
 
         ItemStack[] items = vaultsMap.get(uuid).get(number);
         Inventory inv = Bukkit.createInventory(new VaultIdentity(number),54);
-        inv.addItem(items);
+        inv.setContents(items);
 
         return inv;
     }

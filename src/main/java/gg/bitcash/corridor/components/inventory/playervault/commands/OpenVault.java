@@ -29,7 +29,7 @@ public class OpenVault implements CommandExecutor {
         }
 
         Inventory inventory = instance.getDataService().sendInventory(player.getUniqueId(),num);
-        player.openInventory(player.openInventory(inventory));
+        player.openInventory(inventory);
 
         return true;
     }

@@ -18,8 +18,14 @@ public class VaultCloseListener extends VaultListener implements Listener {
     @EventHandler
     public void onVaultClose(InventoryCloseEvent event) {
         Inventory inventory = event.getInventory();
+
         if (!(inventory.getHolder() instanceof VaultIdentity vaultIdentity)) return;
 
+        System.out.println(inventory);
+        System.out.println(Arrays.toString(inventory.getContents()));
+
         instance.getDataService().saveInventory(inventory,event.getPlayer().getUniqueId());
+
+
     }
 }
