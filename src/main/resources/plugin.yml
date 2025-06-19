@@ -1,0 +1,10 @@
+name: Corridor
+version: 1.0
+author: bitcash
+main: gg.bitcash.corridor.Corridor
+commands:
+  vault:
+    description: OpenVault a vault.
+    aliases: [pv, pvault, playervault]
+#    permission: inferno.flagrate
+    usage: Syntax error! Simply type 12345
