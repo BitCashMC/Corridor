@@ -19,4 +19,9 @@ public class VaultIdentity implements InventoryHolder {
     public Inventory getInventory() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "THIS IS A VALID VAULT HOLDER : " + vaultNumber;
+    }
 }

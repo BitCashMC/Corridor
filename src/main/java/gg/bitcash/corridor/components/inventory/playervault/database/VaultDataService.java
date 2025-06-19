@@ -5,9 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class VaultDataService {
 
@@ -18,7 +16,16 @@ public class VaultDataService {
     }
 
     public Inventory sendInventory(UUID uuid, int number) {
-        ItemStack[] items = vaultsMap.getOrDefault(uuid,new HashMap<>()).getOrDefault(number,new ItemStack[0]);
+
+        if (!(vaultsMap.containsKey(uuid))) {
+            vaultsMap.put(uuid,new HashMap<>());
+        }
+
+        if (!(vaultsMap.get(uuid).containsKey(number))) {
+            vaultsMap.get(uuid).put(number,new ItemStack[0]);
+        }
+
+        ItemStack[] items = vaultsMap.get(uuid).get(number);
         Inventory inv = Bukkit.createInventory(new VaultIdentity(number),54);
         inv.addItem(items);
 
@@ -26,9 +33,10 @@ public class VaultDataService {
     }
 
     public boolean saveInventory(Inventory inventory, UUID uuid) {
-        if (!(inventory instanceof VaultIdentity vaultIdentity)) return false;
+        if (!(inventory.getHolder() instanceof VaultIdentity vaultIdentity)) return false;
 
         vaultsMap.get(uuid).put(vaultIdentity.getVaultNumber(), inventory.getContents());
+
         return true;
     }
 

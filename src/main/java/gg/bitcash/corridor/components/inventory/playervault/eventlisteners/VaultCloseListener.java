@@ -7,12 +7,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 
-public class VaultCloseListener implements Listener {
+import java.util.Arrays;
 
-    Corridor instance;
+public class VaultCloseListener extends VaultListener implements Listener {
 
     public VaultCloseListener(Corridor instance) {
-        this.instance = instance;
+        super(instance);
     }
 
     @EventHandler
