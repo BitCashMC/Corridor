@@ -19,7 +19,7 @@ public class VaultCloseListener extends VaultListener implements Listener {
 
         if (!(inventory.getHolder() instanceof VaultManager.VaultIdentity vaultIdentity)) return;
 
-        instance.getDataService().saveVault(inventory,event.getPlayer().getUniqueId(), vaultIdentity.getVaultNumber());
+        instance.getVaultDataService().saveVault(inventory,event.getPlayer().getUniqueId(), vaultIdentity.getVaultNumber());
 
 
     }

@@ -34,3 +34,20 @@ The vault mechanism allows for players to store items in personal, virtualized c
 > 1. Admin mechanism to open other people's vaults
 > 2. Implement the DAO
 > 3. Introduce configurability
+> 4. Implement a plugin-wide database mechanism to hold players 
+> 
+> ## Username UUID database (GLOBAL)
+> Maintain a database of UUIDs paired to their usernames that will be loaded up onto a cache layer on startup.
+> There will be a DAO that handles the database connectivity. 
+> 
+> Essentially the process is that there will be a DAO that upon startup, loads from a database. And upon termination, 
+> submits the cache to the database.
+> 
+> Cache Layer (PlayerDataService) will be a simple mechanism that stores a Map of all usernames to UUIDs.
+> There will be an event listener for onPlayerJoin to check their username against their UUID, if there is a conflict,
+> it will update the on-memory cache. 
+> 
+> PlayerDAO will handle the database connectivity, and the instantiation of a PlayerDataService.
+> 
+> Batch Insert and other performance improvements
+> Stored procedures
