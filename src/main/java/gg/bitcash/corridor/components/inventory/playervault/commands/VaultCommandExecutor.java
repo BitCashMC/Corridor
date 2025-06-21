@@ -9,13 +9,13 @@ import org.bukkit.command.CommandSender;
 public class VaultCommandExecutor implements CommandExecutor {
 
     private final Corridor instance;
-    private OpenVaultCommandHandler openVaultCommandHandler;
-    private AdminOpenVaultCommandHandler adminOpenVaultCommandHandlerHandler;
+    private final OpenVaultCommandHandler openVaultCommandHandler;
+    private final AdminOpenVaultCommandHandler adminOpenVaultCommandHandler;
 
     public VaultCommandExecutor(Corridor instance) {
         this.instance = instance;
         this.openVaultCommandHandler = new OpenVaultCommandHandler(instance);
-        this.adminOpenVaultCommandHandlerHandler = new AdminOpenVaultCommandHandler(instance);
+        this.adminOpenVaultCommandHandler = new AdminOpenVaultCommandHandler(instance);
     }
 
     @Override
@@ -24,11 +24,9 @@ public class VaultCommandExecutor implements CommandExecutor {
         if (CorridorUtils.isInteger(strings[0])) {
             return openVaultCommandHandler.handle(commandSender,strings);
         }
-
         if (strings[0].equalsIgnoreCase("adminopen")) {
-            return adminOpenVaultCommandHandlerHandler.handle(commandSender,strings);
+            return adminOpenVaultCommandHandler.handle(commandSender,strings);
         }
-
         return false;
     }
 }

@@ -2,7 +2,6 @@ package gg.bitcash.corridor.components.inventory.playervault.database;
 
 import gg.bitcash.corridor.Corridor;
 import gg.bitcash.corridor.components.inventory.playervault.VaultMeta;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -19,7 +18,7 @@ public class VaultDataService {
 
     public Optional<VaultMeta> fetchVaultMeta(UUID uuid, int number) {
 
-        if (instance.getPlayerDataService().playerExists(uuid)) {
+        if (!instance.getPlayerDataService().playerExists(uuid)) {
             return Optional.empty();
         }
         if (!(vaultsMap.containsKey(uuid))) {

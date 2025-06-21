@@ -1,5 +1,5 @@
 name: Corridor
-version: 1.0
+version: 1.0.1
 author: bitcash
 main: gg.bitcash.corridor.Corridor
 commands:

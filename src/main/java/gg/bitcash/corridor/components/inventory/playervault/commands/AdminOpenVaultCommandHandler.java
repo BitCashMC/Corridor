@@ -1,6 +1,7 @@
 package gg.bitcash.corridor.components.inventory.playervault.commands;
 
 import gg.bitcash.corridor.Corridor;
+import gg.bitcash.corridor.CorridorUtils;
 import gg.bitcash.corridor.components.inventory.playervault.VaultMeta;
 import gg.bitcash.corridor.components.inventory.playervault.VaultUtils;
 import org.bukkit.command.CommandSender;
@@ -33,14 +34,15 @@ public class AdminOpenVaultCommandHandler implements CommandHandler {
         UUID uuid = usernameMatch.get();
 
         int num;
-        try {
-            num = Integer.parseInt(args[2]);
-        } catch (NumberFormatException e) {
+        if (!CorridorUtils.isInteger(args[2])) {
             return false;
         }
+        num = Integer.parseInt(args[2]);
 
         Optional<VaultMeta> vaultMetaOpt = instance.getVaultDataService().fetchVaultMeta(uuid,num);
+
         if (vaultMetaOpt.isEmpty()) {
+            player.sendMessage("NO VAULT FOUND");
             return false;
         }
 
