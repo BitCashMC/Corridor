@@ -3,8 +3,7 @@ package gg.bitcash.corridor;
 import gg.bitcash.corridor.components.datamanager.players.PlayerDAO;
 import gg.bitcash.corridor.components.datamanager.players.PlayerDataService;
 import gg.bitcash.corridor.components.datamanager.players.eventlisteners.PlayerUsernameChangeListener;
-import gg.bitcash.corridor.components.inventory.playervault.VaultManager;
-import gg.bitcash.corridor.components.inventory.playervault.commands.OpenVault;
+import gg.bitcash.corridor.components.inventory.playervault.commands.VaultCommandExecutor;
 import gg.bitcash.corridor.components.inventory.playervault.database.VaultDataService;
 import gg.bitcash.corridor.components.inventory.playervault.eventlisteners.VaultCloseListener;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,18 +19,12 @@ public class Corridor extends JavaPlugin {
     private VaultDataService vaultDataService = null;
     private PlayerDataService playerDataService = null;
 
-    private VaultManager vaultManager = null;
-
     public PlayerDataService getPlayerDataService() {
         return playerDataService;
     }
 
     public VaultDataService getVaultDataService() {
         return vaultDataService;
-    }
-
-    public VaultManager getVaultManager() {
-        return vaultManager;
     }
 
     @Override
@@ -52,12 +45,11 @@ public class Corridor extends JavaPlugin {
 
         this.getLogger().log(Level.INFO,"Attempting to establish connection with database : " + name);
         connector = CorridorDataSource.buildDataSource(host,port,name,username,password);
-        vaultDataService = new VaultDataService(); //Pending DAO
-        vaultManager = new VaultManager(vaultDataService);
+        vaultDataService = new VaultDataService(this); //Pending DAO
 
         playerDataService = new PlayerDataService(connector.buildDAO(PlayerDAO.class));
 
-        this.getCommand("vault").setExecutor(new OpenVault(this));
+        this.getCommand("vault").setExecutor(new VaultCommandExecutor(this));
 
         PluginManager pluginManager = this.getServer().getPluginManager();
         pluginManager.registerEvents(new VaultCloseListener(this),this);

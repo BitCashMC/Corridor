@@ -27,7 +27,18 @@ public class PlayerDataService {
     }
 
     public Optional<String> getUsername(UUID uuid) {
-        return this.playersMap.containsKey(uuid) ? Optional.of(this.playersMap.get(uuid)) : Optional.empty();
+        return this.playerExists(uuid) ? Optional.of(this.playersMap.get(uuid)) : Optional.empty();
+    }
+
+    public Optional<UUID> getUUID(String username) {
+        return this.playersMap.entrySet().stream()
+                .filter(entry->entry.getValue().equals(username))
+                .map(Map.Entry::getKey)
+                .findFirst();
+    }
+
+    public boolean playerExists(UUID uuid) {
+        return this.playersMap.containsKey(uuid);
     }
 
 }

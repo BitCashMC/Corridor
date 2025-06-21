@@ -15,3 +15,7 @@ A cache + data storage mechanism (still work in progress) for tracking players' 
 #### To Do:
 1. Have a more robust mechanism to close sources to avoid memory hogging
 2. Use batch inserts for performance
+
+# To Do (General)
+1. Make things multithreaded using a thread pool
+2. Close sources more

@@ -4,7 +4,7 @@ author: bitcash
 main: gg.bitcash.corridor.Corridor
 commands:
   vault:
-    description: OpenVault a vault.
+    description: OpenVaultCommandHandler a vault.
     aliases: [pv, pvault, playervault]
 #    permission: inferno.flagrate
     usage: Syntax error! Simply type 12345
