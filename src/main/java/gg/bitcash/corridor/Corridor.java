@@ -1,10 +1,7 @@
 package gg.bitcash.corridor;
 
-import gg.bitcash.corridor.components.datamanager.players.PlayerDAO;
-import gg.bitcash.corridor.components.datamanager.players.PlayerDataService;
 import gg.bitcash.corridor.components.datamanager.players.eventlisteners.PlayerUsernameChangeListener;
 import gg.bitcash.corridor.components.inventory.playervault.commands.VaultCommandExecutor;
-import gg.bitcash.corridor.components.inventory.playervault.database.VaultDataService;
 import gg.bitcash.corridor.components.inventory.playervault.eventlisteners.VaultCloseListener;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
@@ -12,19 +9,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
 
+/**
+ * The driver class of the plugin. Its running Corridor instance serves as an access point for various data sources and other utils.
+ */
 public class Corridor extends JavaPlugin {
 
     private CorridorDataSource connector = null;
 
-    private VaultDataService vaultDataService = null;
-    private PlayerDataService playerDataService = null;
-
-    public PlayerDataService getPlayerDataService() {
-        return playerDataService;
-    }
-
-    public VaultDataService getVaultDataService() {
-        return vaultDataService;
+    public CorridorDataSource getDataSource() {
+        return connector;
     }
 
     @Override
@@ -44,10 +37,7 @@ public class Corridor extends JavaPlugin {
         password = config.getString("database.password");
 
         this.getLogger().log(Level.INFO,"Attempting to establish connection with database : " + name);
-        connector = CorridorDataSource.buildDataSource(host,port,name,username,password);
-        vaultDataService = new VaultDataService(this); //Pending DAO
-
-        playerDataService = new PlayerDataService(connector.buildDAO(PlayerDAO.class));
+        connector = new CorridorDataSource(host,port,name,username,password);
 
         this.getCommand("vault").setExecutor(new VaultCommandExecutor(this));
 
@@ -59,8 +49,7 @@ public class Corridor extends JavaPlugin {
     @Override
     public void onDisable() {
         this.getLogger().log(Level.INFO,"Saving the current Player UUID cache layer to Database..");
-        this.playerDataService.saveToDatabase();
-        this.connector.closeDatabase_connection();
+        this.connector.closeConnection();
     }
 
 }

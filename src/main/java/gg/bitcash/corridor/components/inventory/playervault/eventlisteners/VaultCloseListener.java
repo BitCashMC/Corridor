@@ -7,20 +7,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 
-public class VaultCloseListener extends VaultListener implements Listener {
+public class VaultCloseListener implements Listener {
+
+    private final Corridor instance;
 
     public VaultCloseListener(Corridor instance) {
-        super(instance);
+        this.instance = instance;
     }
 
     @EventHandler
     public void onVaultClose(InventoryCloseEvent event) {
         Inventory inventory = event.getInventory();
-
         if (!(inventory.getHolder() instanceof VaultIdentity vaultIdentity)) return;
-        instance.getVaultDataService().saveVault(
-                inventory.getContents(),
-                vaultIdentity.getVaultMeta().uuid(),
-                vaultIdentity.getVaultMeta().number());
+
+        vaultIdentity.getVaultMeta().setItemStacks(inventory.getContents());
+        instance.getDataSource().getVaultDAO().putVault(vaultIdentity.getVaultMeta());
     }
 }

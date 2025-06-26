@@ -22,14 +22,15 @@ public class PlayerUsernameChangeListener implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
         String username;
+        Optional<String> usernameOptional = instance.getDataSource().getPlayerDAO().fetchUsername(uuid);
 
-        Optional<String> usernameOptional = instance.getPlayerDataService().getUsername(uuid);
         if (usernameOptional.isPresent()) {
             username = usernameOptional.get();
             if (username.equals(player.getName())) {
                 return;
             }
         }
-        instance.getPlayerDataService().putPlayer(uuid,player.getName());
+
+        instance.getDataSource().getPlayerDAO().putPlayer(uuid, player.getName());
     }
 }

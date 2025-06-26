@@ -1,5 +1,5 @@
 name: Corridor
-version: 1.0.1
+version: 1.1.1-SNAPSHOT
 author: bitcash
 main: gg.bitcash.corridor.Corridor
 commands:
@@ -7,4 +7,4 @@ commands:
     description: OpenVaultCommandHandler a vault.
     aliases: [pv, pvault, playervault]
 #    permission: inferno.flagrate
-    usage: Syntax error! Simply type 12345
+    usage: 'Error: You did not invoke the command correctly. /vault <number|adminopen> <number>'

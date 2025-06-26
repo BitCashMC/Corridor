@@ -25,11 +25,12 @@ public class AdminOpenVaultCommandHandler implements CommandHandler {
             return false;
         }
 
-        String targetUsername = args[1];
-        Optional<UUID> usernameMatch = instance.getPlayerDataService().getUUID(targetUsername);
+        final String targetUsername = args[1];
+        Optional<UUID> usernameMatch = instance.getDataSource().getPlayerDAO().fetchUUID(targetUsername);
 
         if (usernameMatch.isEmpty()) {
-            return false;
+            player.sendMessage("Error: No player '" + targetUsername + "' has joined the server. Verify inputted username and try again.");
+            return true;
         }
         UUID uuid = usernameMatch.get();
 
@@ -39,14 +40,8 @@ public class AdminOpenVaultCommandHandler implements CommandHandler {
         }
         num = Integer.parseInt(args[2]);
 
-        Optional<VaultMeta> vaultMetaOpt = instance.getVaultDataService().fetchVaultMeta(uuid,num);
-
-        if (vaultMetaOpt.isEmpty()) {
-            player.sendMessage("NO VAULT FOUND");
-            return false;
-        }
-
-        Inventory inventory = VaultUtils.buildInventory(instance,vaultMetaOpt.get());
+        VaultMeta vaultMeta = instance.getDataSource().getVaultDAO().fetchVault(uuid,num);
+        Inventory inventory = VaultUtils.buildInventory(vaultMeta,targetUsername);
         player.openInventory(inventory);
 
         return true;

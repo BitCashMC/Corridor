@@ -9,15 +9,37 @@ import java.util.*;
 public class PlayerDAO implements CorridorDAO {
 
     private final CorridorDataSource dataSource;
-    private final String table;
+    private String tableName = null;
+    private boolean initialized;
 
-    public PlayerDAO(CorridorDataSource corridorDataSource) {
+    public PlayerDAO(CorridorDataSource corridorDataSource, String tableName) {
         this.dataSource = corridorDataSource;
-        this.table = this.dataSource.getTablesMap().get(PlayerDAO.class);
+        this.tableName = tableName;
+    }
+
+    @Override
+    public void initialize() {
+        System.out.println("AM I BEING INVOKED? initialize() of PlayerDAO");
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS "+ tableName + " (uuid CHAR(36) PRIMARY KEY, username VARCHAR(36) UNIQUE)")) {
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        initialized = true;
+    }
+
+    @Override
+    public String getTableName() {
+        return tableName;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     public boolean putPlayer(UUID uuid, String username) {
-        try (PreparedStatement stmt = this.dataSource.getDatabase_connection().prepareStatement("INSERT INTO " + this.table + " VALUES(?,?) ON DUPLICATE KEY UPDATE username = ?")){
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("INSERT INTO " + this.tableName + " VALUES(?,?) ON DUPLICATE KEY UPDATE username = ?")){
             stmt.setString(1,uuid.toString());
             stmt.setString(2,username);
             stmt.setString(3,username);
@@ -29,7 +51,7 @@ public class PlayerDAO implements CorridorDAO {
     }
 
     public Optional<String> fetchUsername(UUID uuid) {
-        try (PreparedStatement stmt = this.dataSource.getDatabase_connection().prepareStatement("SELECT username FROM " + this.table + " WHERE uuid = ?")) {
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT username FROM " + this.tableName + " WHERE uuid = ?")) {
             stmt.setString(1,uuid.toString());
             ResultSet resultSet = stmt.executeQuery();
             if (resultSet.next()) {
@@ -42,27 +64,17 @@ public class PlayerDAO implements CorridorDAO {
         return Optional.empty();
     }
 
-    // For the DataService Cache Layer
-    public Map<UUID,String> fetchAll() {
-        Map<UUID,String> uuidUsernamePairs = new HashMap<>();
-        try (PreparedStatement stmt = this.dataSource.getDatabase_connection().prepareStatement("SELECT uuid,username FROM " + this.table)){
-            ResultSet resultSet = stmt.executeQuery();
-            while (resultSet.next()) {
-                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                String username = resultSet.getString("username");
-                uuidUsernamePairs.put(uuid,username);
+    public Optional<UUID> fetchUUID(String username) {
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT uuid FROM " + this.tableName + " WHERE username = ?")) {
+            stmt.setString(1,username);
+            ResultSet rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Optional.empty();
             }
+            return Optional.of(UUID.fromString(rs.getString("uuid")));
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return uuidUsernamePairs;
-    }
-
-    public boolean putAll(Map<UUID,String> playerMap) {
-        boolean success = true;
-        for (Map.Entry<UUID,String> row : playerMap.entrySet()) {
-            success &= putPlayer(row.getKey(),row.getValue());
-        }
-        return success;
+        return Optional.empty();
     }
 }
