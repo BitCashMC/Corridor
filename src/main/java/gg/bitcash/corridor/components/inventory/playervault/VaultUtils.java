@@ -46,10 +46,8 @@ public class VaultUtils {
         //Instantiate necessary InputStreams
         try (ByteArrayInputStream bis = new ByteArrayInputStream(serializedInventory); ObjectInputStream ois = new ObjectInputStream(bis)) {
             List<Map<String,Object>> preDeserialize = (List<Map<String, Object>>) ois.readObject();
-
-            return preDeserialize.stream().map(p->p != null ? ItemStack.deserialize(p) : null)
-                    .toList()
-                    .toArray(new ItemStack[54]); //Reduce and return an ItemStack[54]
+            // Return it as an array.
+            return preDeserialize.stream().map(p->p != null ? ItemStack.deserialize(p) : null).toArray(ItemStack[]::new);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
