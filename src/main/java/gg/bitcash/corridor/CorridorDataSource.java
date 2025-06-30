@@ -6,6 +6,10 @@ import gg.bitcash.corridor.components.inventory.playervault.database.VaultDAO;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Handles the connections to the databases, as well as serving as an access point for the various DAOs across the application
@@ -13,8 +17,18 @@ import java.sql.SQLException;
 public class CorridorDataSource {
 
     private final HikariDataSource connectionPool;
-    private PlayerDAO playerDAO;
-    private VaultDAO vaultDAO;
+    private final PlayerDAO playerDAO;
+    private final VaultDAO vaultDAO;
+    private final Corridor instance;
+    private final ExecutorService daoThreadPool;
+
+    public Corridor getInstance() {
+        return instance;
+    }
+
+    public final ExecutorService getDaoThreadPool() {
+        return daoThreadPool;
+    }
 
     /**
      * Gets a Connection instance from the connection pool.
@@ -41,15 +55,29 @@ public class CorridorDataSource {
      * @param username The username used to log into the database
      * @param password The password used to log into the database
      */
-    public CorridorDataSource(String host, int port, String name, String username, String password) {
+    public CorridorDataSource(Corridor instance, String host, int port, String name, String username, String password) throws SQLException {
+        this.instance = instance;
+        daoThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
+
         final String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + name;
-        connectionPool = new HikariDataSource();
-        connectionPool.setJdbcUrl(jdbcUrl);
-        connectionPool.setUsername(username);
-        connectionPool.setPassword(password);
+
+        Future<HikariDataSource> connPoolFuture = daoThreadPool.submit(() -> {
+            HikariDataSource hikariDataSource = new HikariDataSource();
+            hikariDataSource.setJdbcUrl(jdbcUrl);
+            hikariDataSource.setUsername(username);
+            hikariDataSource.setPassword(password);
+
+            return hikariDataSource;
+        });
 
         playerDAO = new PlayerDAO(this,"players");
         vaultDAO = new VaultDAO(this,"vaults");
+
+        try {
+            connectionPool = connPoolFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new SQLException("Failed to connect to the database!");
+        }
 
         try {
             playerDAO.initialize();
@@ -57,7 +85,6 @@ public class CorridorDataSource {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
     /**

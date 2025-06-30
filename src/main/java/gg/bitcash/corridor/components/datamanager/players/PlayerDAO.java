@@ -5,6 +5,8 @@ import gg.bitcash.corridor.CorridorDataSource;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 public class PlayerDAO implements CorridorDAO {
 
@@ -19,7 +21,6 @@ public class PlayerDAO implements CorridorDAO {
 
     @Override
     public void initialize() {
-        System.out.println("AM I BEING INVOKED? initialize() of PlayerDAO");
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS "+ tableName + " (uuid CHAR(36) PRIMARY KEY, username VARCHAR(36) UNIQUE)")) {
             stmt.execute();
         } catch (SQLException e) {
@@ -38,43 +39,51 @@ public class PlayerDAO implements CorridorDAO {
         return initialized;
     }
 
-    public boolean putPlayer(UUID uuid, String username) {
-        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("INSERT INTO " + this.tableName + " VALUES(?,?) ON DUPLICATE KEY UPDATE username = ?")){
-            stmt.setString(1,uuid.toString());
-            stmt.setString(2,username);
-            stmt.setString(3,username);
-            return stmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+    public void putPlayer(UUID uuid, String username) {
+        Runnable op = () -> {
+            try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("INSERT INTO " + this.tableName + " VALUES(?,?) ON DUPLICATE KEY UPDATE username = ?")){
+                stmt.setString(1,uuid.toString());
+                stmt.setString(2,username);
+                stmt.setString(3,username);
+                stmt.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        };
+        dataSource.getDaoThreadPool().submit(op);
     }
 
-    public Optional<String> fetchUsername(UUID uuid) {
-        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT username FROM " + this.tableName + " WHERE uuid = ?")) {
-            stmt.setString(1,uuid.toString());
-            ResultSet resultSet = stmt.executeQuery();
-            if (resultSet.next()) {
-                String username = resultSet.getString("username");
-                return Optional.of(username);
+    public Future<Optional<String>> fetchUsername(UUID uuid) {
+        Callable<Optional<String>> op = () -> {
+            try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT username FROM " + this.tableName + " WHERE uuid = ?")) {
+                stmt.setString(1,uuid.toString());
+                ResultSet resultSet = stmt.executeQuery();
+                if (resultSet.next()) {
+                    String username = resultSet.getString("username");
+                    return Optional.of(username);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
+            return Optional.empty();
+        };
+        return dataSource.getDaoThreadPool().submit(op);
     }
 
-    public Optional<UUID> fetchUUID(String username) {
-        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT uuid FROM " + this.tableName + " WHERE username = ?")) {
-            stmt.setString(1,username);
-            ResultSet rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Optional.empty();
+    public Future<Optional<UUID>> fetchUUID(String username) {
+        Callable<Optional<UUID>> op = () -> {
+            try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT uuid FROM " + this.tableName + " WHERE username = ?")) {
+                stmt.setString(1,username);
+                ResultSet rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    return Optional.empty();
+                }
+                return Optional.of(UUID.fromString(rs.getString("uuid")));
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-            return Optional.of(UUID.fromString(rs.getString("uuid")));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
+            return Optional.empty();
+        };
+        return dataSource.getDaoThreadPool().submit(op);
     }
 }

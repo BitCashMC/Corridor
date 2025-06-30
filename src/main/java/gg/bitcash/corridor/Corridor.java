@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.sql.SQLException;
 import java.util.logging.Level;
 
 /**
@@ -22,7 +23,6 @@ public class Corridor extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
         this.saveDefaultConfig();
 
         FileConfiguration config = getConfig();
@@ -37,7 +37,13 @@ public class Corridor extends JavaPlugin {
         password = config.getString("database.password");
 
         this.getLogger().log(Level.INFO,"Attempting to establish connection with database : " + name);
-        connector = new CorridorDataSource(host,port,name,username,password);
+
+        try {
+            connector = new CorridorDataSource(this,host,port,name,username,password);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            this.getServer().getPluginManager().disablePlugin(this);
+        }
 
         this.getCommand("vault").setExecutor(new VaultCommandExecutor(this));
 
@@ -48,7 +54,6 @@ public class Corridor extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        this.getLogger().log(Level.INFO,"Saving the current Player UUID cache layer to Database..");
         this.connector.closeConnection();
     }
 

@@ -23,18 +23,15 @@ public class VaultUtils {
      * @param items The array of ItemStack s to be serialized
      * @return A byte array representing the serialized state of the List of Bukkit-serialized ItemStacks.
      */
-    public static byte[] serializeInventory(ItemStack[] items) {
-        /*
-        Instantiate the necessary OutputStreams to receive the Bukkit-serialized list of Maps, and then to serialize that serialization into bytecode.
-         */
+    public static byte[] serializeInventory(ItemStack[] items) throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             List<Map<String,Object>> preSerialize = Arrays.stream(items).map(p->p != null ? p.serialize() : null).toList();
             oos.writeObject(preSerialize);
             return bos.toByteArray(); // Return the byte array
         } catch (IOException e) {
             e.printStackTrace();
+            throw new IOException("Failed to serialize the given ItemStack array denoting an inventory, into an array of bytes.");
         }
-        return null;
     }
     /**
      * Performs a double-layered deserialization process to, given an array of bytes, deserialize the bytecode that this byte array represents into the higher-level serialization format adopted by Bukkit's serialization mechanism. From there it will
@@ -42,7 +39,7 @@ public class VaultUtils {
      * @param serializedInventory The byte array representing the (presumably correct) serialization of the items
      * @return The reduced ItemStack array
      */
-    public static ItemStack[] deserializeInventory(byte[] serializedInventory) {
+    public static ItemStack[] deserializeInventory(byte[] serializedInventory) throws IOException {
         //Instantiate necessary InputStreams
         try (ByteArrayInputStream bis = new ByteArrayInputStream(serializedInventory); ObjectInputStream ois = new ObjectInputStream(bis)) {
             List<Map<String,Object>> preDeserialize = (List<Map<String, Object>>) ois.readObject();
@@ -50,7 +47,7 @@ public class VaultUtils {
             return preDeserialize.stream().map(p->p != null ? ItemStack.deserialize(p) : null).toArray(ItemStack[]::new);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
+            throw new IOException("Failed to deserialize the given byte array into an ItemStack array denoting an inventory.");
         }
-        return null;
     }
 }

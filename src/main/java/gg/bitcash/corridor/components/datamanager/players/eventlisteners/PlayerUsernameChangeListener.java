@@ -1,6 +1,7 @@
 package gg.bitcash.corridor.components.datamanager.players.eventlisteners;
 
 import gg.bitcash.corridor.Corridor;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,6 +9,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class PlayerUsernameChangeListener implements Listener {
 
@@ -21,16 +23,21 @@ public class PlayerUsernameChangeListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        String username;
-        Optional<String> usernameOptional = instance.getDataSource().getPlayerDAO().fetchUsername(uuid);
 
-        if (usernameOptional.isPresent()) {
-            username = usernameOptional.get();
-            if (username.equals(player.getName())) {
-                return;
+        Bukkit.getScheduler().runTaskAsynchronously(instance,()->{
+            try {
+                Optional<String> usernameOptional = instance.getDataSource().getPlayerDAO().fetchUsername(uuid).get();
+                String username;
+                if (usernameOptional.isPresent()) {
+                    username = usernameOptional.get();
+                    if (username.equals(player.getName())) {
+                        return;
+                    }
+                    instance.getDataSource().getPlayerDAO().putPlayer(uuid, player.getName());
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
             }
-        }
-
-        instance.getDataSource().getPlayerDAO().putPlayer(uuid, player.getName());
+        });
     }
 }

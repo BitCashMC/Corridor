@@ -20,6 +20,9 @@ public class VaultCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
+        if (strings.length == 0) {
+            return false;
+        }
 
         if (CorridorUtils.isInteger(strings[0])) {
             return openVaultCommandHandler.handle(commandSender,strings);
