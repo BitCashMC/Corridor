@@ -1,7 +1,6 @@
 package gg.bitcash.corridor.components.datamanager.players.eventlisteners;
 
 import gg.bitcash.corridor.Corridor;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,7 +23,7 @@ public class PlayerUsernameChangeListener implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        Bukkit.getScheduler().runTaskAsynchronously(instance,()->{
+        instance.getThreadService().getThreadPool().submit(()->{
             try {
                 Optional<String> usernameOptional = instance.getDataSource().getPlayerDAO().fetchUsername(uuid).get();
                 String username;

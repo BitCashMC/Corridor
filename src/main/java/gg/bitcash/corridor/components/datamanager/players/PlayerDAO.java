@@ -50,7 +50,7 @@ public class PlayerDAO implements CorridorDAO {
                 e.printStackTrace();
             }
         };
-        dataSource.getDaoThreadPool().submit(op);
+        dataSource.getInstance().getThreadService().getThreadPool().submit(op);
     }
 
     public Future<Optional<String>> fetchUsername(UUID uuid) {
@@ -67,7 +67,7 @@ public class PlayerDAO implements CorridorDAO {
             }
             return Optional.empty();
         };
-        return dataSource.getDaoThreadPool().submit(op);
+        return dataSource.getInstance().getThreadService().getThreadPool().submit(op);
     }
 
     public Future<Optional<UUID>> fetchUUID(String username) {
@@ -84,6 +84,6 @@ public class PlayerDAO implements CorridorDAO {
             }
             return Optional.empty();
         };
-        return dataSource.getDaoThreadPool().submit(op);
+        return dataSource.getInstance().getThreadService().getThreadPool().submit(op);
     }
 }

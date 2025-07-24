@@ -7,8 +7,6 @@ import gg.bitcash.corridor.components.inventory.playervault.database.VaultDAO;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -20,16 +18,10 @@ public class CorridorDataSource {
     private final PlayerDAO playerDAO;
     private final VaultDAO vaultDAO;
     private final Corridor instance;
-    private final ExecutorService daoThreadPool;
 
     public Corridor getInstance() {
         return instance;
     }
-
-    public final ExecutorService getDaoThreadPool() {
-        return daoThreadPool;
-    }
-
     /**
      * Gets a Connection instance from the connection pool.
      * @return a connection fetched from the connection pool.
@@ -57,11 +49,10 @@ public class CorridorDataSource {
      */
     public CorridorDataSource(Corridor instance, String host, int port, String name, String username, String password) throws SQLException {
         this.instance = instance;
-        daoThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
 
         final String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + name;
 
-        Future<HikariDataSource> connPoolFuture = daoThreadPool.submit(() -> {
+        Future<HikariDataSource> connPoolFuture = instance.getThreadService().getThreadPool().submit(() -> {
             HikariDataSource hikariDataSource = new HikariDataSource();
             hikariDataSource.setJdbcUrl(jdbcUrl);
             hikariDataSource.setUsername(username);

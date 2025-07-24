@@ -7,6 +7,8 @@ import gg.bitcash.corridor.components.inventory.playervault.VaultUtils;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -60,11 +62,16 @@ public class VaultDAO implements CorridorDAO {
                 stmt.setBytes(3,serializedItems);
                 stmt.setBytes(4,serializedItems);
                 stmt.execute();
+
+                synchronized(vaultMeta) {
+                    vaultMeta.notifyAll();
+                }
+
             } catch (SQLException | IOException e) {
                 e.printStackTrace();
             }
         };
-        dataSource.getDaoThreadPool().submit(op);
+        dataSource.getInstance().getThreadService().getThreadPool().submit(op);
     }
 
     public Future<VaultMeta> fetchVault(UUID uuid, int number) {
@@ -77,6 +84,10 @@ public class VaultDAO implements CorridorDAO {
                 if (!rs.next()) {
                     VaultMeta vaultMeta = new VaultMeta(uuid,number,new ItemStack[54]);
                     putVault(vaultMeta);
+
+                    synchronized (vaultMeta) {
+                        vaultMeta.wait(5000L);
+                    }
                     rs = stmt.executeQuery();
 
                     if (!rs.next()) {
@@ -93,6 +104,6 @@ public class VaultDAO implements CorridorDAO {
                 return null;
             }
         };
-        return dataSource.getDaoThreadPool().submit(op);
+        return dataSource.getInstance().getThreadService().getThreadPool().submit(op);
     }
 }
