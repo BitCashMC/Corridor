@@ -48,6 +48,7 @@ public class SideboardHandler {
      */
     public void closeActiveBoardFromPlayer(Player player) {
         player.getScoreboard().clearSlot(DisplaySlot.SIDEBAR);
+        player.sendMessage("Board " + monitor.getCurrentBoard(player) + " closed from player (or tried at least).");
     }
     /**
      * Open the active board for a player
@@ -55,5 +56,6 @@ public class SideboardHandler {
      */
     public void openActiveBoardForPlayer(Player player) {
         monitor.getCurrentBoard(player).ifPresent(board->player.setScoreboard(board.getScoreboard()));
+        player.sendMessage("Board " + monitor.getCurrentBoard(player) + " displayed to player (or tried at least).");
     }
 }

@@ -47,4 +47,9 @@ public class SideboardMeta {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

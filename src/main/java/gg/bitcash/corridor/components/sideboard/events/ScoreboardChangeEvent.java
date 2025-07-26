@@ -8,8 +8,6 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import java.lang.reflect.Method;
-
 public class ScoreboardChangeEvent extends Event implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
@@ -28,9 +26,7 @@ public class ScoreboardChangeEvent extends Event implements Cancellable {
         this.type = type;
         this.handler = handler;
 
-        handler.getMonitor().getCurrentBoard(player).ifPresentOrElse(b-> {
-            this.setCancelled(true);
-        },() -> {
+        handler.getMonitor().getCurrentBoard(player).ifPresentOrElse(b->this.setCancelled(true),() -> {
             handler.closeActiveBoardFromPlayer(player);
             for (SideboardMeta board : handler.getSideboardRegistry().getSection(type)) {
                 if (handler.getMonitor().tryUpdatingCurrentBoard(player,board)) {
@@ -46,11 +42,7 @@ public class ScoreboardChangeEvent extends Event implements Cancellable {
         this.isCancelled = false;
         this.type = null;
         this.handler = handler;
-
-        Runnable orElse = () -> {
-            for (SideboardMeta sb : handler.ge)
-        }
-        handler.getMonitor().getCurrentBoard(player).ifPresentOrElse(b->player.setScoreboard(b.getScoreboard()),()->);
+        handler.getMonitor().getCurrentBoard(player).ifPresent(b->player.setScoreboard(b.getScoreboard()));
     }
 
     @Override

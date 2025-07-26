@@ -21,7 +21,6 @@ public class ScoreboardDisplayListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         ScoreboardChangeEvent changeEvent = new ScoreboardChangeEvent(handler,player);
-        player.sendMessage("TEST 123");
         handler.getInstance().getServer().getPluginManager().callEvent(changeEvent);
     }
 
