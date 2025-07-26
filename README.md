@@ -12,10 +12,6 @@ A standard player vaults mechanism (still work in progress)
 
 ## Player UUID Service
 A cache + data storage mechanism (still work in progress) for tracking players' usernames by their UUIDs, removing the need to scan the disk for offline players or reach out to Mojang servers.
-#### To Do:
-1. Have a more robust mechanism to close sources to avoid memory hogging
-2. Use batch inserts for performance
 
-# To Do (General)
-1. Make things multithreaded using a thread pool
-2. Close sources more
+
+

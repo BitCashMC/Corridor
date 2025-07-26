@@ -1,17 +1,21 @@
 package gg.bitcash.corridor.components.datamanager.players;
 
-import gg.bitcash.corridor.CorridorDAO;
+import gg.bitcash.corridor.DAO;
 import gg.bitcash.corridor.CorridorDataSource;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-public class PlayerDAO implements CorridorDAO {
+public class PlayerDAO implements DAO {
 
     private final CorridorDataSource dataSource;
-    private String tableName = null;
+    private final String tableName;
     private boolean initialized;
 
     public PlayerDAO(CorridorDataSource corridorDataSource, String tableName) {

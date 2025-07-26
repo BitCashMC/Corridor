@@ -15,9 +15,4 @@ public class WorldCondition implements DisplayCondition {
         return player.getWorld().getName().equalsIgnoreCase(world);
     }
 
-    @Override
-    public void setValue(String world) {
-        this.world = world;
-    }
-
 }

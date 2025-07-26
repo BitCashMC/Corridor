@@ -3,14 +3,14 @@ package gg.bitcash.corridor;
 import gg.bitcash.corridor.components.datamanager.players.eventlisteners.PlayerUsernameChangeListener;
 import gg.bitcash.corridor.components.inventory.playervault.commands.VaultCommandExecutor;
 import gg.bitcash.corridor.components.inventory.playervault.eventlisteners.VaultCloseListener;
-import gg.bitcash.corridor.components.sideboard.SideboardConfiguration;
+import gg.bitcash.corridor.components.sideboard.config.SideboardConfiguration;
 import gg.bitcash.corridor.components.sideboard.SideboardHandler;
-import gg.bitcash.corridor.components.sideboard.displaycondition.DisplayCondition;
-import gg.bitcash.corridor.components.sideboard.eventlisteners.ShowScoreboardOnJoinListener;
+import gg.bitcash.corridor.components.sideboard.eventlisteners.ScoreboardDisplayListener;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -24,7 +24,6 @@ public class Corridor extends JavaPlugin {
 
     private CorridorThreadService threadService = null;
     private CorridorDataSource connector = null;
-    private DisplayCondition.ConditionRegistry conditionRegistry = null;
     private SideboardHandler sideboardHandler = null;
 
     public CorridorDataSource getDataSource() {
@@ -66,7 +65,7 @@ public class Corridor extends JavaPlugin {
         PluginManager pluginManager = this.getServer().getPluginManager();
         pluginManager.registerEvents(new VaultCloseListener(this),this);
         pluginManager.registerEvents(new PlayerUsernameChangeListener(this),this);
-        pluginManager.registerEvents(new ShowScoreboardOnJoinListener(sideboardHandler),this);
+        pluginManager.registerEvents(new ScoreboardDisplayListener(sideboardHandler),this);
     }
 
     private void initializeSideboards() {
@@ -74,7 +73,7 @@ public class Corridor extends JavaPlugin {
         if (!file.exists()) {
             this.saveResource("scoreboards.yml",false);
         }
-        sideboardHandler = new SideboardHandler(new SideboardConfiguration(YamlConfiguration.loadConfiguration(file)));
+        sideboardHandler = new SideboardHandler(new SideboardConfiguration(YamlConfiguration.loadConfiguration(file)),this);
     }
 
     @Override

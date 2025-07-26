@@ -8,4 +8,6 @@ scoreboards:
       - " "
       - "line 4"
     displayConditions:
-      world: world
+      world:
+        class: WorldCondition.class
+        value: world

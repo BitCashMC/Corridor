@@ -1,22 +1,23 @@
 package gg.bitcash.corridor.components.inventory.playervault.database;
 
-import gg.bitcash.corridor.CorridorDAO;
+import gg.bitcash.corridor.DAO;
 import gg.bitcash.corridor.CorridorDataSource;
 import gg.bitcash.corridor.components.inventory.playervault.VaultMeta;
 import gg.bitcash.corridor.components.inventory.playervault.VaultUtils;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.reflect.Method;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-public class VaultDAO implements CorridorDAO {
+public class VaultDAO implements DAO {
 
-    private String tableName = null;
+    private final String tableName;
     private boolean initialized = false;
     private final CorridorDataSource dataSource;
 

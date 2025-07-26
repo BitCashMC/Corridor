@@ -4,7 +4,7 @@ import java.sql.SQLException;
 /**
  * Abstracts the DAOs across the application
  */
-public interface CorridorDAO {
+public interface DAO {
 
     void initialize() throws SQLException;
 

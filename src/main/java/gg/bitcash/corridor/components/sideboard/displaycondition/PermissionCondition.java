@@ -14,9 +14,4 @@ public class PermissionCondition implements DisplayCondition {
     public boolean shouldDisplay(Player player) {
         return player.hasPermission(permission);
     }
-
-    @Override
-    public void setValue(String permission) {
-        this.permission = permission;
-    }
 }
