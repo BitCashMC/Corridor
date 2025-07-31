@@ -27,7 +27,6 @@ public class ScoreboardChangeEvent extends Event implements Cancellable {
         this.handler = handler;
 
         handler.getMonitor().getCurrentBoard(player).ifPresentOrElse(b->this.setCancelled(true),() -> {
-            handler.closeActiveBoardFromPlayer(player);
             for (SideboardMeta board : handler.getSideboardRegistry().getSection(type)) {
                 if (handler.getMonitor().tryUpdatingCurrentBoard(player,board)) {
                     handler.openActiveBoardForPlayer(player);
@@ -42,7 +41,7 @@ public class ScoreboardChangeEvent extends Event implements Cancellable {
         this.isCancelled = false;
         this.type = null;
         this.handler = handler;
-        handler.getMonitor().getCurrentBoard(player).ifPresent(b->player.setScoreboard(b.getScoreboard()));
+        handler.getMonitor().getCurrentBoard(player).ifPresentOrElse(b->this.setCancelled(true),);
     }
 
     @Override

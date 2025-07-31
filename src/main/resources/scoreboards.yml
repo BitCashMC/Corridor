@@ -9,5 +9,17 @@ scoreboards:
       - "line 4"
     displayConditions:
       world:
-        class: WorldCondition.class
+        class: gg.bitcash.corridor.components.sideboard.displaycondition.WorldCondition
         value: world
+  example2:
+    title: "NETHER BOARD"
+    body:
+      - "line 1"
+      - "line 2"
+      - "line 3"
+      - " "
+      - "line 3"
+    displayConditions:
+      world:
+        class: gg.bitcash.corridor.components.sideboard.displaycondition.WorldCondition
+        value: world_nether

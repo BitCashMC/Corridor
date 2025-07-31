@@ -22,13 +22,8 @@ public class SideboardHandler {
     public SideboardHandler(SideboardConfiguration config, Corridor instance) {
         this.instance = instance;
         this.config = config;
-        this.sideboardRegistry = new SideboardRegistry();
+        this.sideboardRegistry = new SideboardRegistry(config.buildAllFromConfig());
         this.monitor = new SideboardMonitor(this);
-
-        this.sideboardRegistry.putAsList(config.buildAllFromConfig(this));
-        for (SideboardMeta board : getSideboardRegistry().asList()) {
-            sideboardRegistry.register(board);
-        }
     }
 
     public SideboardMonitor getMonitor() {
@@ -48,14 +43,12 @@ public class SideboardHandler {
      */
     public void closeActiveBoardFromPlayer(Player player) {
         player.getScoreboard().clearSlot(DisplaySlot.SIDEBAR);
-        player.sendMessage("Board " + monitor.getCurrentBoard(player) + " closed from player (or tried at least).");
     }
     /**
      * Open the active board for a player
      * @param player
      */
     public void openActiveBoardForPlayer(Player player) {
-        monitor.getCurrentBoard(player).ifPresent(board->player.setScoreboard(board.getScoreboard()));
-        player.sendMessage("Board " + monitor.getCurrentBoard(player) + " displayed to player (or tried at least).");
+        monitor.getCurrentBoard(player).ifPresent(board->board.forceBoardDisplay(player));
     }
 }
