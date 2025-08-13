@@ -24,11 +24,11 @@ public class SideboardMeta {
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.displayName(title);
 
-        for (int )
-    }
-
-    public String getName() {
-        return name;
+        for (int i = body.size()-1; i>=0; i--) {
+            Score s = objective.getScore("Line " + i);
+            s.customName(body.get(i));
+            s.setScore(i);
+        }
     }
 
     public List<DisplayCondition> getDisplayConditions() {
@@ -37,10 +37,6 @@ public class SideboardMeta {
 
     protected void forceBoardDisplay(Player player) {
         player.setScoreboard(scoreboard);
-    }
-
-    public Objective getObjective() {
-        return objective;
     }
 
     protected boolean meetsConditions(Player player) {

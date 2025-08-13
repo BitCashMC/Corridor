@@ -23,7 +23,7 @@ public class PlayerUsernameChangeListener implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        instance.getThreadService().getThreadPool().submit(()->{
+        instance.getThreadService().runAsync(()->{
             try {
                 Optional<String> usernameOptional = instance.getDataSource().getPlayerDAO().fetchUsername(uuid).get();
                 String username;

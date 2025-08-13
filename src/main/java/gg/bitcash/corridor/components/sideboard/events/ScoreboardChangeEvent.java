@@ -41,7 +41,6 @@ public class ScoreboardChangeEvent extends Event implements Cancellable {
         this.isCancelled = false;
         this.type = null;
         this.handler = handler;
-        handler.getMonitor().getCurrentBoard(player).ifPresentOrElse(b->this.setCancelled(true),);
     }
 
     @Override

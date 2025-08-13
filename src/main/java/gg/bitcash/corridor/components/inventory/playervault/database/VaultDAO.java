@@ -1,7 +1,7 @@
 package gg.bitcash.corridor.components.inventory.playervault.database;
 
 import gg.bitcash.corridor.DAO;
-import gg.bitcash.corridor.CorridorDataSource;
+import gg.bitcash.corridor.DataSource;
 import gg.bitcash.corridor.components.inventory.playervault.VaultMeta;
 import gg.bitcash.corridor.components.inventory.playervault.VaultUtils;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +19,7 @@ public class VaultDAO implements DAO {
 
     private final String tableName;
     private boolean initialized = false;
-    private final CorridorDataSource dataSource;
+    private final DataSource dataSource;
 
     @Override
     public void initialize() throws SQLException {
@@ -49,12 +49,12 @@ public class VaultDAO implements DAO {
         return initialized;
     }
 
-    public VaultDAO(CorridorDataSource dataSource, String tableName) {
+    public VaultDAO(DataSource dataSource, String tableName) {
         this.dataSource = dataSource;
         this.tableName = tableName;
     }
 
-    public void putVault(VaultMeta vaultMeta) {
+    public Future<String> putVault(VaultMeta vaultMeta) {
         Runnable op = () -> {
             try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("INSERT INTO " + tableName + " VALUES(?,?,?) ON DUPLICATE KEY UPDATE serialized_vault_contents = ?")) {
                 byte[] serializedItems = VaultUtils.serializeInventory(vaultMeta.itemStacks());
@@ -64,47 +64,49 @@ public class VaultDAO implements DAO {
                 stmt.setBytes(4,serializedItems);
                 stmt.execute();
 
-                synchronized(vaultMeta) {
-                    vaultMeta.notifyAll();
-                }
-
             } catch (SQLException | IOException e) {
                 e.printStackTrace();
             }
         };
-        dataSource.getInstance().getThreadService().getThreadPool().submit(op);
+        return dataSource.getInstance().getThreadService().runAsync(op);
     }
 
+    /**
+     * Executes a query to fetch and assemble a VaultMeta instance by inputted UUID and int number. It will also fallback to inserting a new vault if no vault was found with the specified credentials.
+     *
+     * @param uuid
+     * @param number
+     * @return
+     */
     public Future<VaultMeta> fetchVault(UUID uuid, int number) {
         Callable<VaultMeta> op = () -> {
             try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT * FROM "+ tableName +" WHERE owner_uuid = ? AND vault_number = ?")) {
                 stmt.setString(1,uuid.toString());
                 stmt.setInt(2,number);
                 ResultSet rs = stmt.executeQuery();
-
+                // In the event that no entry is found from the query, a fallback operation will occur in which a new, empty vault will be inserted with the aforementioned uuid and number.
                 if (!rs.next()) {
                     VaultMeta vaultMeta = new VaultMeta(uuid,number,new ItemStack[54]);
-                    putVault(vaultMeta);
+                    //Storing the computation as a Future; ThreadService will return null if the computation did not complete.
+                    Future<String> fallback = putVault(vaultMeta);
+                    //Block the thread until the computation has finished. Assign the ResultSet to null if the computation failed, otherwise re-execute the query.
+                    rs = fallback.get() != null ? stmt.executeQuery() : null;
 
-                    synchronized (vaultMeta) {
-                        vaultMeta.wait(5000L);
-                    }
-                    rs = stmt.executeQuery();
-
-                    if (!rs.next()) {
+                    if (rs == null || !rs.next()) {
                         throw new SQLException("Expected vault to exist after insertion, but no result returned.");
                     }
                 }
-
+                // Proceed as usual from here:
                 UUID fetchedUUID = UUID.fromString(rs.getString("owner_uuid"));
                 int fetchedNumber = rs.getInt("vault_number");
                 ItemStack[] fetchedDeserializedContents = VaultUtils.deserializeInventory(rs.getBytes("serialized_vault_contents"));
+                // Return the packaged vaultmeta
                 return new VaultMeta(fetchedUUID,fetchedNumber,fetchedDeserializedContents);
             } catch (SQLException | IOException e) {
                 e.printStackTrace();
                 return null;
             }
         };
-        return dataSource.getInstance().getThreadService().getThreadPool().submit(op);
+        return dataSource.getInstance().getThreadService().runAsync(op);
     }
 }

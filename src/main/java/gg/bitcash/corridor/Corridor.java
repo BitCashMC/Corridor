@@ -10,7 +10,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -22,20 +21,20 @@ import java.util.logging.Level;
  */
 public class Corridor extends JavaPlugin {
 
-    private CorridorThreadService threadService = null;
-    private CorridorDataSource connector = null;
+    private ThreadService threadService = null;
+    private DataSource connector = null;
     private SideboardHandler sideboardHandler = null;
 
-    public CorridorDataSource getDataSource() {
+    public DataSource getDataSource() {
         return connector;
     }
-    public CorridorThreadService getThreadService() {
+    public ThreadService getThreadService() {
         return threadService;
     }
 
     @Override
     public void onEnable() {
-        threadService = new CorridorThreadService(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2));
+        threadService = new ThreadService(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2));
         this.saveDefaultConfig();
 
         FileConfiguration config = this.getConfig();
@@ -52,7 +51,7 @@ public class Corridor extends JavaPlugin {
         this.getLogger().log(Level.INFO,"Attempting to establish connection with database : " + name);
 
         try {
-            connector = new CorridorDataSource(this,host,port,name,username,password);
+            connector = new DataSource(this,host,port,name,username,password);
         } catch (SQLException e) {
             e.printStackTrace();
             this.getServer().getPluginManager().disablePlugin(this);

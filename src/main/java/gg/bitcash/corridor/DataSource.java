@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
 /**
  * Handles the connections to the databases, as well as serving as an access point for the various DAOs across the application
  */
-public class CorridorDataSource {
+public class DataSource {
 
     private final HikariDataSource connectionPool;
     private final PlayerDAO playerDAO;
@@ -47,12 +47,12 @@ public class CorridorDataSource {
      * @param username The username used to log into the database
      * @param password The password used to log into the database
      */
-    public CorridorDataSource(Corridor instance, String host, int port, String name, String username, String password) throws SQLException {
+    public DataSource(Corridor instance, String host, int port, String name, String username, String password) throws SQLException {
         this.instance = instance;
 
         final String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + name;
 
-        Future<HikariDataSource> connPoolFuture = instance.getThreadService().getThreadPool().submit(() -> {
+        Future<HikariDataSource> connPoolFuture = instance.getThreadService().runAsync(() -> {
             HikariDataSource hikariDataSource = new HikariDataSource();
             hikariDataSource.setJdbcUrl(jdbcUrl);
             hikariDataSource.setUsername(username);

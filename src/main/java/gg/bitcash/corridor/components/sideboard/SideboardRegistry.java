@@ -2,10 +2,7 @@ package gg.bitcash.corridor.components.sideboard;
 
 import gg.bitcash.corridor.components.sideboard.displaycondition.DisplayCondition;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SideboardRegistry {
     private final Map<Class<? extends DisplayCondition>, List<SideboardMeta>> conditionsMap;

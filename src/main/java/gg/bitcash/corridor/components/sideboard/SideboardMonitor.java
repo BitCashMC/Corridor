@@ -2,13 +2,10 @@ package gg.bitcash.corridor.components.sideboard;
 
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class SideboardMonitor {
-    private final Map<UUID,SideboardMeta> playerCurrentBoard;
+    private final Map<UUID, Stack<SideboardMeta>> playerCurrentBoard;
     private final SideboardHandler handler;
 
     public SideboardMonitor(SideboardHandler handler) {
@@ -24,7 +21,7 @@ public class SideboardMonitor {
     public boolean tryUpdatingCurrentBoard(Player player, SideboardMeta board) {
         if (board.meetsConditions(player)) {
             //Add (or replace) the players active board to the Map.
-            playerCurrentBoard.put(player.getUniqueId(),board);
+            playerCurrentBoard.computeIfAbsent(player.getUniqueId(),s->new Stack<>()).push(board);
             return true;
         }
         return false;
@@ -37,11 +34,12 @@ public class SideboardMonitor {
      */
     private boolean checkCurrentBoard(Player player) {
         UUID uuid = player.getUniqueId();
-        if (playerCurrentBoard.computeIfAbsent(uuid, k->null) == null) {
+        if (!playerCurrentBoard.containsKey(uuid)) {
             return false;
         }
-        if (!playerCurrentBoard.get(uuid).meetsConditions(player)) {
-            playerCurrentBoard.put(uuid,null);
+        Stack<SideboardMeta> boards = playerCurrentBoard.get(uuid);
+        if (!boards.peek().meetsConditions(player)) {
+            boards.pop();
             return false;
         }
         return true;
@@ -51,6 +49,6 @@ public class SideboardMonitor {
      * @return an {@link Optional} which may or may not contain the player's active board. Why wouldn't it? Because it will only fetch the value corresponding to that UUID if it is NOT null.
      */
     public Optional<SideboardMeta> getCurrentBoard(Player player) {
-        return checkCurrentBoard(player) ? Optional.of(playerCurrentBoard.get(player.getUniqueId())) : Optional.empty();
+        return checkCurrentBoard(player) ? Optional.of(playerCurrentBoard.get(player.getUniqueId()).peek()) : Optional.empty();
     }
 }

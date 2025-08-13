@@ -1,7 +1,7 @@
 package gg.bitcash.corridor.components.datamanager.players;
 
 import gg.bitcash.corridor.DAO;
-import gg.bitcash.corridor.CorridorDataSource;
+import gg.bitcash.corridor.DataSource;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,12 +14,12 @@ import java.util.concurrent.Future;
 
 public class PlayerDAO implements DAO {
 
-    private final CorridorDataSource dataSource;
+    private final DataSource dataSource;
     private final String tableName;
     private boolean initialized;
 
-    public PlayerDAO(CorridorDataSource corridorDataSource, String tableName) {
-        this.dataSource = corridorDataSource;
+    public PlayerDAO(DataSource dataSource, String tableName) {
+        this.dataSource = dataSource;
         this.tableName = tableName;
     }
 
@@ -50,11 +50,12 @@ public class PlayerDAO implements DAO {
                 stmt.setString(2,username);
                 stmt.setString(3,username);
                 stmt.execute();
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         };
-        dataSource.getInstance().getThreadService().getThreadPool().submit(op);
+        dataSource.getInstance().getThreadService().runAsync(op);
     }
 
     public Future<Optional<String>> fetchUsername(UUID uuid) {
@@ -71,7 +72,7 @@ public class PlayerDAO implements DAO {
             }
             return Optional.empty();
         };
-        return dataSource.getInstance().getThreadService().getThreadPool().submit(op);
+        return dataSource.getInstance().getThreadService().runAsync(op);
     }
 
     public Future<Optional<UUID>> fetchUUID(String username) {
@@ -88,6 +89,6 @@ public class PlayerDAO implements DAO {
             }
             return Optional.empty();
         };
-        return dataSource.getInstance().getThreadService().getThreadPool().submit(op);
+        return dataSource.getInstance().getThreadService().runAsync(op);
     }
 }
