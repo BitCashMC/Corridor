@@ -1,7 +1,6 @@
 package gg.bitcash.corridor.components.sideboard;
 
 import gg.bitcash.corridor.Corridor;
-import gg.bitcash.corridor.components.sideboard.config.SideboardConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 
@@ -23,7 +22,7 @@ public class SideboardHandler {
         this.instance = instance;
         this.config = config;
         this.sideboardRegistry = new SideboardRegistry(config.buildAllFromConfig());
-        this.monitor = new SideboardMonitor(this);
+        this.monitor = new SideboardMonitor();
     }
 
     public SideboardMonitor getMonitor() {

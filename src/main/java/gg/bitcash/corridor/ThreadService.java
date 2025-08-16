@@ -2,16 +2,11 @@ package gg.bitcash.corridor;
 
 import org.bukkit.Bukkit;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 
 public class ThreadService {
 
     private final ExecutorService threadPool;
-    private fin
-    private static final String state = "COMPLETE";
 
     public ThreadService(ExecutorService threadPool) {
         this.threadPool = threadPool;
@@ -21,8 +16,25 @@ public class ThreadService {
         return threadPool.submit(task);
     }
 
-    public Future<String> runAsync(Runnable task) {
-        Bukkit.getScheduler()
-        return threadPool.submit(task,state);
+    public Future<State> runAsync(Runnable task) {
+        return threadPool.submit(task,State.SUCCESS);
+    }
+
+    public <T> Future<T> run(Callable<T> task) {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        try {
+            T result = task.call();
+            future.complete(result);
+        } catch (Exception e) {
+            future.completeExceptionally(e);
+        }
+        return future;
+    }
+
+    public Future<State> run(Runnable task) {
+        CompletableFuture<State> future = new CompletableFuture<>();
+        task.run();
+        future.complete(State.SUCCESS);
+        return future;
     }
 }

@@ -3,7 +3,7 @@ package gg.bitcash.corridor;
 import gg.bitcash.corridor.components.datamanager.players.eventlisteners.PlayerUsernameChangeListener;
 import gg.bitcash.corridor.components.inventory.playervault.commands.VaultCommandExecutor;
 import gg.bitcash.corridor.components.inventory.playervault.eventlisteners.VaultCloseListener;
-import gg.bitcash.corridor.components.sideboard.config.SideboardConfiguration;
+import gg.bitcash.corridor.components.sideboard.SideboardConfiguration;
 import gg.bitcash.corridor.components.sideboard.SideboardHandler;
 import gg.bitcash.corridor.components.sideboard.eventlisteners.ScoreboardDisplayListener;
 import org.bukkit.configuration.file.FileConfiguration;

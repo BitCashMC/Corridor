@@ -6,11 +6,9 @@ import java.util.*;
 
 public class SideboardMonitor {
     private final Map<UUID, Stack<SideboardMeta>> playerCurrentBoard;
-    private final SideboardHandler handler;
 
-    public SideboardMonitor(SideboardHandler handler) {
+    public SideboardMonitor() {
         this.playerCurrentBoard = new HashMap<>();
-        this.handler = handler;
     }
     /**
      * Attempts to set the Player's current board to the passed one, possibly overwriting an existing board in the process.
@@ -19,6 +17,7 @@ public class SideboardMonitor {
      * @return <code>true</code> if player was eligible and now possesses that board as their active one, or <code>false</code> if they did not meet the needed conditions.
      */
     public boolean tryUpdatingCurrentBoard(Player player, SideboardMeta board) {
+
         if (board.meetsConditions(player)) {
             //Add (or replace) the players active board to the Map.
             playerCurrentBoard.computeIfAbsent(player.getUniqueId(),s->new Stack<>()).push(board);

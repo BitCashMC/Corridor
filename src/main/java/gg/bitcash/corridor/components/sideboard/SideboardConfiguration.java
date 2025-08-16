@@ -1,14 +1,10 @@
-package gg.bitcash.corridor.components.sideboard.config;
+package gg.bitcash.corridor.components.sideboard;
 
-import gg.bitcash.corridor.components.sideboard.SideboardHandler;
-import gg.bitcash.corridor.components.sideboard.SideboardMeta;
 import gg.bitcash.corridor.components.sideboard.displaycondition.DisplayCondition;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import java.lang.reflect.Constructor;
@@ -17,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class SideboardConfiguration {
+public final class SideboardConfiguration {
 
     private final FileConfiguration config;
 
@@ -25,7 +21,7 @@ public class SideboardConfiguration {
         this.config = config;
     }
 
-    public TextComponent loadTitle(String board) {
+    private TextComponent loadTitle(String board) {
         String title = config.getString(keyPath(board,"title"));
         if (title == null) {
             throw new YAMLException("key \"title\" is missing for board \""+board+"\"");
@@ -33,7 +29,7 @@ public class SideboardConfiguration {
         return Component.text(title);
     }
 
-    public List<TextComponent> loadBody(String board) {
+    private List<TextComponent> loadBody(String board) {
         List<String> body = config.getStringList(keyPath(board,"body"));
 
         if (body.isEmpty()) {
@@ -42,12 +38,10 @@ public class SideboardConfiguration {
         if (body.size() > 16)
             throw new UnsupportedOperationException("Configured scoreboard cannot have more than 16 lines");
 
-        List<TextComponent> parsedBody = new ArrayList<>(body.stream().map(Component::text).toList());
-        Collections.reverse(parsedBody);
-        return parsedBody;
+        return body.stream().map(Component::text).toList();
     }
 
-    protected List<DisplayCondition> loadDisplayConditions(String board) {
+    private List<DisplayCondition> loadDisplayConditions(String board) {
         ConfigurationSection section = config.getConfigurationSection(keyPath(board, "displayConditions"));
         if (section == null) return List.of();
 
@@ -71,7 +65,7 @@ public class SideboardConfiguration {
         return displayConditions;
     }
 
-    public List<SideboardMeta> buildAllFromConfig() {
+    protected List<SideboardMeta> buildAllFromConfig() {
         List<SideboardMeta> boards = new ArrayList<>();
         for (String key : getAllBoardKeys()) {
             SideboardMeta board = new SideboardMeta(key,loadTitle(key),loadBody(key),loadDisplayConditions(key));

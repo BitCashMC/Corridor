@@ -2,6 +2,8 @@ package gg.bitcash.corridor.components.inventory.playervault.database;
 
 import gg.bitcash.corridor.DAO;
 import gg.bitcash.corridor.DataSource;
+import gg.bitcash.corridor.State;
+import gg.bitcash.corridor.ThreadService;
 import gg.bitcash.corridor.components.inventory.playervault.VaultMeta;
 import gg.bitcash.corridor.components.inventory.playervault.VaultUtils;
 import org.bukkit.inventory.ItemStack;
@@ -54,7 +56,7 @@ public class VaultDAO implements DAO {
         this.tableName = tableName;
     }
 
-    public Future<String> putVault(VaultMeta vaultMeta) {
+    public Future<State> putVault(State mode, VaultMeta vaultMeta) {
         Runnable op = () -> {
             try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("INSERT INTO " + tableName + " VALUES(?,?,?) ON DUPLICATE KEY UPDATE serialized_vault_contents = ?")) {
                 byte[] serializedItems = VaultUtils.serializeInventory(vaultMeta.itemStacks());
@@ -68,7 +70,8 @@ public class VaultDAO implements DAO {
                 e.printStackTrace();
             }
         };
-        return dataSource.getInstance().getThreadService().runAsync(op);
+        ThreadService service = dataSource.getInstance().getThreadService();
+        return mode == State.ASYNC ? service.runAsync(op) : service.run(op);
     }
 
     /**
@@ -88,7 +91,7 @@ public class VaultDAO implements DAO {
                 if (!rs.next()) {
                     VaultMeta vaultMeta = new VaultMeta(uuid,number,new ItemStack[54]);
                     //Storing the computation as a Future; ThreadService will return null if the computation did not complete.
-                    Future<String> fallback = putVault(vaultMeta);
+                    Future<State> fallback = putVault(State.SYNC,vaultMeta);
                     //Block the thread until the computation has finished. Assign the ResultSet to null if the computation failed, otherwise re-execute the query.
                     rs = fallback.get() != null ? stmt.executeQuery() : null;
 
