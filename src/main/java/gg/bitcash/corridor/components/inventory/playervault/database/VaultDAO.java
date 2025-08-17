@@ -56,7 +56,7 @@ public class VaultDAO implements DAO {
         this.tableName = tableName;
     }
 
-    public Future<State> putVault(State mode, VaultMeta vaultMeta) {
+    public Future<State> putVault(ThreadService.Context mode, VaultMeta vaultMeta) {
         Runnable op = () -> {
             try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement("INSERT INTO " + tableName + " VALUES(?,?,?) ON DUPLICATE KEY UPDATE serialized_vault_contents = ?")) {
                 byte[] serializedItems = VaultUtils.serializeInventory(vaultMeta.itemStacks());
@@ -71,7 +71,7 @@ public class VaultDAO implements DAO {
             }
         };
         ThreadService service = dataSource.getInstance().getThreadService();
-        return mode == State.ASYNC ? service.runAsync(op) : service.run(op);
+        return mode == ThreadService.Context.ASYNC ? service.runAsync(op) : service.runInline(op);
     }
 
     /**
@@ -91,7 +91,7 @@ public class VaultDAO implements DAO {
                 if (!rs.next()) {
                     VaultMeta vaultMeta = new VaultMeta(uuid,number,new ItemStack[54]);
                     //Storing the computation as a Future; ThreadService will return null if the computation did not complete.
-                    Future<State> fallback = putVault(State.SYNC,vaultMeta);
+                    Future<State> fallback = putVault(ThreadService.Context.SYNC,vaultMeta);
                     //Block the thread until the computation has finished. Assign the ResultSet to null if the computation failed, otherwise re-execute the query.
                     rs = fallback.get() != null ? stmt.executeQuery() : null;
 

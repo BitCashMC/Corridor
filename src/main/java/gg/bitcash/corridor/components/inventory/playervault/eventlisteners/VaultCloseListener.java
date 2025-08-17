@@ -2,6 +2,7 @@ package gg.bitcash.corridor.components.inventory.playervault.eventlisteners;
 
 import gg.bitcash.corridor.Corridor;
 import gg.bitcash.corridor.State;
+import gg.bitcash.corridor.ThreadService;
 import gg.bitcash.corridor.components.inventory.playervault.VaultIdentity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,6 +23,6 @@ public class VaultCloseListener implements Listener {
         if (!(inventory.getHolder() instanceof VaultIdentity vaultIdentity)) return;
 
         vaultIdentity.getVaultMeta().setItemStacks(inventory.getContents());
-        instance.getDataSource().getVaultDAO().putVault(State.ASYNC,vaultIdentity.getVaultMeta());
+        instance.getDataSource().getVaultDAO().putVault(ThreadService.Context.ASYNC,vaultIdentity.getVaultMeta());
     }
 }

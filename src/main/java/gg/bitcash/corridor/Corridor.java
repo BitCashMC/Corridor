@@ -13,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
@@ -34,7 +35,8 @@ public class Corridor extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        threadService = new ThreadService(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2));
+        ExecutorService thPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
+        threadService = new ThreadService(this,thPool,getServer().getScheduler());
         this.saveDefaultConfig();
 
         FileConfiguration config = this.getConfig();
