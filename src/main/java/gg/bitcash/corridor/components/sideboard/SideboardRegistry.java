@@ -30,7 +30,7 @@ public class SideboardRegistry {
     public List<SideboardMeta> getSection(Class<? extends DisplayCondition> key) {
         List<SideboardMeta> section = conditionsMap.getOrDefault(key, null);
         if (section == null)
-            throw new IllegalArgumentException("No such condition has been registered @ " + key.getName());
+            throw new IllegalArgumentException("No such condition exists: " + key.getName());
         return section;
     }
 }

@@ -5,25 +5,12 @@ import org.bukkit.entity.Player;
 import java.util.*;
 
 public class SideboardMonitor {
-    private final Map<UUID, Stack<SideboardMeta>> playerCurrentBoard;
+    private final Map<UUID, Stack<SideboardMeta>> stackMap;
+    private final SideboardRegistry registry;
 
-    public SideboardMonitor() {
-        this.playerCurrentBoard = new HashMap<>();
-    }
-    /**
-     * Attempts to set the Player's current board to the passed one, possibly overwriting an existing board in the process.
-     * @param player
-     * @param board
-     * @return <code>true</code> if player was eligible and now possesses that board as their active one, or <code>false</code> if they did not meet the needed conditions.
-     */
-    public boolean tryUpdatingCurrentBoard(Player player, SideboardMeta board) {
-
-        if (board.meetsConditions(player)) {
-            //Add (or replace) the players active board to the Map.
-            playerCurrentBoard.computeIfAbsent(player.getUniqueId(),s->new Stack<>()).push(board);
-            return true;
-        }
-        return false;
+    public SideboardMonitor(SideboardRegistry registry) {
+        this.stackMap = new HashMap<>();
+        this.registry = registry;
     }
     /**
      * This private method will be invoked whenever the public method {@link SideboardMonitor#getCurrentBoard(Player)} is invoked. It will determine whether the players active board
@@ -33,21 +20,22 @@ public class SideboardMonitor {
      */
     private boolean checkCurrentBoard(Player player) {
         UUID uuid = player.getUniqueId();
-        if (!playerCurrentBoard.containsKey(uuid)) {
+        if (!stackMap.containsKey(uuid) || !stackMap.get(uuid).isEmpty()) {
             return false;
         }
-        Stack<SideboardMeta> boards = playerCurrentBoard.get(uuid);
-        if (!boards.peek().meetsConditions(player)) {
-            boards.pop();
-            return false;
+
+        for (Stack<SideboardMeta> boards = stackMap.get(uuid); !boards.isEmpty(); boards.pop()) {
+            if (boards.peek().meetsConditions(player)) {
+                return true;
+            }
         }
-        return true;
+        return ;
     }
     /**
      * @param player
      * @return an {@link Optional} which may or may not contain the player's active board. Why wouldn't it? Because it will only fetch the value corresponding to that UUID if it is NOT null.
      */
     public Optional<SideboardMeta> getCurrentBoard(Player player) {
-        return checkCurrentBoard(player) ? Optional.of(playerCurrentBoard.get(player.getUniqueId()).peek()) : Optional.empty();
+        return checkCurrentBoard(player) ? Optional.of(stackMap.get(player.getUniqueId()).peek()) : Optional.empty();
     }
 }

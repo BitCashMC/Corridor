@@ -1,8 +1,15 @@
 package gg.bitcash.corridor.components.sideboard;
 
 import gg.bitcash.corridor.Corridor;
+import gg.bitcash.corridor.ThreadService;
+import gg.bitcash.corridor.components.sideboard.displaycondition.DisplayCondition;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.ScoreboardManager;
+
+import java.util.Optional;
+import java.util.function.BiConsumer;
 
 /**
  * This class (which is only instantiated once at startup) is responsible for tracking, delivering and ceasing scoreboard displays to players. It maintains a registry (See {@link gg.bitcash.corridor.components.sideboard.SideboardRegistry}).
@@ -10,7 +17,6 @@ import org.bukkit.scoreboard.DisplaySlot;
 public class SideboardHandler {
 
     private final SideboardRegistry sideboardRegistry;
-    private SideboardConfiguration config;
     private final Corridor instance;
     private final SideboardMonitor monitor;
     /**
@@ -20,34 +26,37 @@ public class SideboardHandler {
      */
     public SideboardHandler(SideboardConfiguration config, Corridor instance) {
         this.instance = instance;
-        this.config = config;
         this.sideboardRegistry = new SideboardRegistry(config.buildAllFromConfig());
-        this.monitor = new SideboardMonitor();
-    }
-
-    public SideboardMonitor getMonitor() {
-        return monitor;
+        this.monitor = new SideboardMonitor(sideboardRegistry);
     }
 
     public Corridor getInstance() {
         return instance;
     }
 
-    public SideboardRegistry getSideboardRegistry() {
-        return sideboardRegistry;
+    public void openBoard(Player player, Class<? extends DisplayCondition> type) {
+        final ThreadService service = instance.getThreadService();
+
+        Runnable op = () -> {
+            BiConsumer<Player,SideboardMeta> sendBoard = (plyr,brd) -> service.runBukkitTask(()->brd.forceBoardDisplay(plyr));
+            Optional<SideboardMeta> validBoard = monitor.getCurrentBoard(player);
+
+            if (validBoard.isPresent()) {
+                sendBoard.accept(player,validBoard.get());
+                return;
+            }
+
+            for (SideboardMeta board : sideboardRegistry.getSection(type)) {
+                if (board.meetsConditions(player)) {
+                    sendBoard.accept(player,board);
+                }
+            }
+        };
+
+        service.runAsync(op);
     }
-    /**
-     * A simple method to shut the board for a player. Gets
-     * @param player
-     */
-    public void closeActiveBoardFromPlayer(Player player) {
-        player.getScoreboard().clearSlot(DisplaySlot.SIDEBAR);
-    }
-    /**
-     * Open the active board for a player
-     * @param player
-     */
-    public void openActiveBoardForPlayer(Player player) {
-        monitor.getCurrentBoard(player).ifPresent(board->board.forceBoardDisplay(player));
+
+    public void closeBoard(Player player) {
+        instance.getThreadService().runBukkitTask(()->player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard()));
     }
 }
